@@ -1,0 +1,766 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>类终端样机终态处理方式 | 海外营销管理规范</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        success: '#00B42A',
+                        warning: '#FF7D00',
+                        danger: '#F53F3F',
+                        neutral: '#86909C',
+                        light: '#F2F3F5',
+                        dark: '#1D2129',
+                        marioRed: '#E53935',
+                        marioBlue: '#1976D2',
+                        marioYellow: '#FFC107',
+                        marioGreen: '#4CAF50',
+                        marioBg: '#87CEEB' // 玛丽兄弟天空蓝背景色
+                    },
+                    fontFamily: {
+                        sans: ['Microsoft YaHei', '微软雅黑', 'system-ui', 'sans-serif'], // 统一微软雅黑
+                        mario: ['Microsoft YaHei', '微软雅黑', 'sans-serif'] // 游戏风格字体也改为微软雅黑
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            /* 全局游戏风格基础样式 - 去除文字阴影，简化效果 */
+            .mario-border {
+                border: 4px solid #000;
+                box-shadow: 0 6px 0 #000;
+            }
+            /* 移除文字重影相关样式 */
+            .mario-btn {
+                background: #FFC107;
+                color: #000;
+                border: 3px solid #000;
+                box-shadow: 3px 3px 0 #000;
+                transform: skew(-2deg, 0);
+                transition: all 0.2s ease;
+                font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
+            }
+            .mario-btn:hover {
+                transform: skew(-2deg, 0) translateY(-4px);
+                box-shadow: 5px 5px 0 #000;
+            }
+            .mario-card {
+                background: #fff;
+                border: 4px solid #000;
+                box-shadow: 0 6px 0 #000;
+                transition: all 0.3s ease;
+            }
+            .mario-card:hover {
+                transform: translateY(-6px);
+                box-shadow: 0 12px 0 #000;
+            }
+            .mario-tab-active {
+                border-bottom: 4px solid #E53935;
+                color: #E53935;
+                font-weight: 600;
+                /* 移除文字阴影 */
+            }
+            .mario-section {
+                background: #F8F9FA;
+                border: 3px solid #000;
+                box-shadow: 0 4px 0 #000;
+            }
+            .mario-badge {
+                background: #4CAF50;
+                color: #fff;
+                border: 2px solid #000;
+                box-shadow: 2px 2px 0 #000;
+                font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
+                font-size: 0.7rem;
+            }
+            
+            /* 原有动画优化 - 简化，去除文字相关动画 */
+            .card-shadow {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .tab-active {
+                border-bottom: 3px solid #165DFF;
+                color: #165DFF;
+                font-weight: 600;
+            }
+            /* 玛丽兄弟游戏风格背景 - 保留场景元素，简化纹理 */
+            .mario-title-bg {
+                background: linear-gradient(120deg, #E53935 0%, #FFC107 33%, #4CAF50 66%, #1976D2 100%);
+                background-size: 400% 400%;
+                animation: marioGradient 8s ease infinite;
+                border: 4px solid #000;
+                box-shadow: 0 0 0 3px #fff, 0 10px 0 #000;
+                position: relative;
+                overflow: hidden;
+            }
+            /* 简化像素纹理 */
+            .mario-title-bg::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background-image: 
+                    linear-gradient(rgba(0,0,0,0.08) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0,0,0,0.08) 1px, transparent 1px);
+                background-size: 12px 12px;
+                z-index: 0;
+                pointer-events: none;
+            }
+            /* 游戏场景元素 - 保留核心，简化动画强度 */
+            .mario-cloud {
+                position: absolute;
+                background: #fff;
+                border-radius: 50%;
+                box-shadow: 
+                    0 0 0 10px #fff,
+                    -20px 0 0 10px #fff,
+                    20px 0 0 10px #fff,
+                    -10px 10px 0 10px #fff,
+                    10px 10px 0 10px #fff;
+                opacity: 0.9;
+                animation: cloudFloat 30s linear infinite;
+            }
+            .mario-pipe {
+                position: absolute;
+                width: 50px;
+                height: 100px;
+                background: #4CAF50;
+                border: 4px solid #000;
+                border-radius: 10px 10px 0 0;
+                z-index: 0;
+            }
+            .mario-pipe::after {
+                content: '';
+                position: absolute;
+                bottom: -20px;
+                left: -6px;
+                width: 62px;
+                height: 20px;
+                background: #388E3C;
+                border: 4px solid #000;
+                border-top: none;
+            }
+            .mario-brick {
+                position: absolute;
+                width: 36px;
+                height: 36px;
+                background: #E53935;
+                border: 4px solid #000;
+                animation: brickBounce 4s ease-in-out infinite;
+            }
+            .mario-brick::before {
+                content: '';
+                position: absolute;
+                inset: 4px;
+                background: rgba(0,0,0,0.15);
+            }
+            /* 地面元素 - 保留 */
+            .mario-ground {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 24px;
+                background: #8B4513;
+                border-top: 4px solid #000;
+                z-index: 0;
+            }
+            .mario-ground::after {
+                content: '';
+                position: absolute;
+                inset: 4px 0 0 0;
+                background-image: 
+                    linear-gradient(90deg, #A0522D 10px, transparent 10px);
+                background-size: 20px 100%;
+            }
+            
+            /* 文字样式 - 完全简化，去除重影和倾斜，使用微软雅黑 */
+            .mario-text {
+                color: #fff;
+                font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
+                font-weight: bold;
+                line-height: 1.2;
+                /* 移除文字阴影、倾斜、弹跳动画 */
+            }
+            .mario-subtext {
+                color: #fff;
+                font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
+                font-size: 1.8rem; /* 基础字号放大，配合响应式调整 */
+                /* 移除文字阴影和脉冲动画 */
+            }
+            .mario-tag {
+                background: #FFC107;
+                color: #000;
+                border: 3px solid #000;
+                box-shadow: 4px 4px 0 #000;
+                /* 移除倾斜效果 */
+                transition: all 0.2s ease;
+                font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;
+                font-size: 0.9rem;
+            }
+            .mario-tag:hover {
+                transform: translateY(-5px);
+                box-shadow: 6px 6px 0 #000;
+            }
+            
+            /* 装饰图标 - 简化透明度和大小 */
+            .decor-icon {
+                position: absolute;
+                opacity: 0.2;
+                font-size: 8rem;
+                color: #fff;
+                /* 移除文字阴影 */
+                animation: floatScale 15s ease-in-out infinite;
+            }
+            .decor-icon.cube {
+                animation-delay: 0s;
+                animation-duration: 12s;
+            }
+            .decor-icon.shield {
+                animation-delay: 1.5s;
+                animation-duration: 15s;
+            }
+            .decor-icon.triangle {
+                animation-delay: 3s;
+                animation-duration: 14s;
+            }
+            .decor-icon.circle {
+                animation-delay: 4.5s;
+                animation-duration: 16s;
+            }
+            /* 移除文字相关动画 */
+            /* 标题呼吸动画 - 简化强度 */
+            .title-breath {
+                animation: breath 6s ease-in-out infinite;
+            }
+            /* 标签浮动动画 - 简化 */
+            .tag-float {
+                animation: tagFloat 10s ease-in-out infinite;
+            }
+            .tag-float:nth-child(1) { animation-delay: 0s; }
+            .tag-float:nth-child(2) { animation-delay: 3s; }
+            .tag-float:nth-child(3) { animation-delay: 6s; }
+            /* 粒子点缀 - 简化效果 */
+            .particle {
+                position: absolute;
+                background-color: #FFC107;
+                border: 2px solid #FF8F00;
+                border-radius: 50%;
+                box-shadow: 0 0 4px #FFEB3B;
+                animation: particleFloat 12s linear infinite;
+            }
+
+            /* 核心动画关键帧 - 简化强度 */
+            @keyframes marioGradient {
+                0% { background-position: 0% 50%; }
+                50% { background-position: 100% 50%; }
+                100% { background-position: 0% 50%; }
+            }
+            @keyframes cloudFloat {
+                0% { transform: translateX(-150px) translateY(30px); }
+                100% { transform: translateX(calc(100% + 150px)) translateY(30px); }
+            }
+            @keyframes brickBounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-10px); }
+            }
+            @keyframes floatScale {
+                0% {
+                    transform: translate(0, 0) rotate(0deg) scale(1);
+                    opacity: 0.1;
+                }
+                50% {
+                    transform: translate(15px, -15px) rotate(5deg) scale(1.1);
+                    opacity: 0.25;
+                }
+                100% {
+                    transform: translate(0, 0) rotate(0deg) scale(1);
+                    opacity: 0.1;
+                }
+            }
+            @keyframes breath {
+                0% { opacity: 0.9; transform: scale(1); }
+                50% { opacity: 1; transform: scale(1.02); }
+                100% { opacity: 0.9; transform: scale(1); }
+            }
+            @keyframes tagFloat {
+                0% { transform: translateY(0); }
+                50% { transform: translateY(-8px); }
+                100% { transform: translateY(0); }
+            }
+            @keyframes particleFloat {
+                0% {
+                    transform: translateY(100vh) rotate(0deg) scale(0.8);
+                    opacity: 0;
+                }
+                15% { opacity: 1; }
+                85% { opacity: 1; }
+                100% {
+                    transform: translateY(-100px) rotate(360deg) scale(1.2);
+                    opacity: 0;
+                }
+            }
+        }
+    </style>
+    <!-- 无需额外引入字体，使用系统自带微软雅黑 -->
+</head>
+<!-- 页面背景保留玛丽兄弟天空蓝，简化纹理 -->
+<body class="bg-marioBg font-sans text-dark relative overflow-x-hidden">
+    <!-- 全局游戏装饰元素 - 保留但简化动画 -->
+    <div class="mario-brick fixed top-20 left-10 z-0 hidden md:block" style="animation-delay: 0s;"></div>
+    <div class="mario-brick fixed top-40 right-10 z-0 hidden md:block" style="animation-delay: 1s;"></div>
+    <div class="mario-brick fixed top-80 left-20 z-0 hidden lg:block" style="animation-delay: 2s;"></div>
+    <div class="mario-brick fixed top-60 right-20 z-0 hidden lg:block" style="animation-delay: 3s;"></div>
+    
+    <!-- 简化顶部导航 - 保留游戏风格按钮，去除文字阴影 -->
+    <header class="bg-white mario-border sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-end items-center">
+            <button class="mario-btn md:hidden text-dark text-xl px-3 py-1 rounded">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 核心内容区 -->
+    <main class="container mx-auto px-4 py-8 relative z-10">
+        <!-- 玛丽兄弟游戏风格大标题框 - 保留场景，简化文字效果 -->
+        <div class="mario-title-bg rounded-lg p-8 md:p-12 mb-12 text-center relative overflow-hidden">
+            <!-- 游戏场景元素 - 保留 -->
+            <div class="mario-ground"></div>
+            <div class="mario-cloud top-8 left-8 w-20 h-20" style="animation-delay: 0s;"></div>
+            <div class="mario-cloud top-16 right-8 w-24 h-24" style="animation-delay: 8s;"></div>
+            <div class="mario-pipe bottom-24 left-1/6 hidden md:block"></div>
+            <div class="mario-pipe bottom-24 right-1/6 hidden md:block"></div>
+            <div class="mario-brick top-10 left-1/4 hidden md:block"></div>
+            <div class="mario-brick top-16 right-1/4 hidden md:block" style="animation-delay: 0.5s;"></div>
+            <div class="mario-brick top-22 left-1/3 hidden lg:block" style="animation-delay: 1s;"></div>
+            <div class="mario-brick top-28 right-1/3 hidden lg:block" style="animation-delay: 1.5s;"></div>
+            
+            <!-- 粒子点缀 - 简化效果 -->
+            <div id="particles-container" class="absolute inset-0 pointer-events-none"></div>
+            
+            <!-- 几何装饰图标 - 简化透明度 -->
+            <i class="fa fa-cube decor-icon cube top-[-30px] left-[-30px] hidden md:block"></i>
+            <i class="fa fa-shield decor-icon shield bottom-[-30px] right-[-30px] hidden md:block"></i>
+            <i class="fa fa-triangle decor-icon triangle top-[-20px] right-[-40px] hidden lg:block"></i>
+            <i class="fa fa-circle-o decor-icon circle bottom-[-40px] left-[-20px] hidden lg:block"></i>
+            
+            <!-- 标题内容 - 简化排版，去除重影 -->
+            <div class="relative z-10">
+                <!-- 主标题（一行显示，微软雅黑，无重影） -->
+                <h2 class="mario-text text-[clamp(2rem,7vw,3rem)] font-bold mb-6 leading-tight">
+                    让“幽灵样机”从你的名下彻底消失！
+                </h2>
+                <!-- 副标题（放大2个字号，微软雅黑，无重影）- 响应式范围调整为1.6rem-2.2rem -->
+                <p class="mario-subtext mb-8 text-[clamp(1.6rem,5vw,2.2rem)] font-semibold">
+                    ——iEAM样机终极销账指南——
+                </p>
+                
+                <!-- 简化下划线 -->
+                <div class="mt-6 flex justify-center">
+                    <div class="w-60 h-4 bg-marioYellow rounded-full border-3 border-black animate-pulse"></div>
+                </div>
+                
+                <!-- 核心价值标签 - 简化效果，将"资产合规"改为"外发合规" -->
+                <div class="mt-10 flex flex-wrap justify-center gap-4">
+                    <span class="tag-float mario-tag px-5 py-3 rounded text-sm md:text-base font-medium">外发合规</span>
+                    <span class="tag-float mario-tag px-5 py-3 rounded text-sm md:text-base font-medium">流程规范</span>
+                    <span class="tag-float mario-tag px-5 py-3 rounded text-sm md:text-base font-medium">账实一致</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 说明栏 - 简化文字效果 -->
+        <div class="mario-section bg-primary/10 p-6 mb-10 rounded-lg">
+            <div class="flex items-start">
+                <i class="fa fa-info-circle text-marioRed mt-2 mr-4 text-xl"></i>
+                <div>
+                    <h3 class="font-semibold text-dark mb-2 text-lg font-mario text-marioRed">样机领用≠结束，外发返还≠结束</h3>
+                    <p class="text-black text-base font-medium">从你接收样机的那一刻，便为它写下了故事的开篇：它在，账在；它若不在，请为故事画上句点（完成系统销账）</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 处理方式分类标签 - 简化文字效果 -->
+        <div class="flex flex-wrap border-b-3 border-black mb-10">
+            <button class="mario-tab-active py-4 px-5 focus:outline-none font-mario text-sm md:text-base" data-target="donate">
+                <i class="fa fa-gift mr-2"></i>赠送外部使用方
+            </button>
+            <button class="py-4 px-5 text-neutral hover:text-marioRed focus:outline-none font-mario text-sm md:text-base" data-target="destroy">
+                <i class="fa fa-trash mr-2"></i>本地报废
+            </button>
+            <button class="py-4 px-5 text-neutral hover:text-marioRed focus:outline-none font-mario text-sm md:text-base" data-target="return">
+                <i class="fa fa-reply mr-2"></i>归还总部
+            </button>
+            <button class="py-4 px-5 text-neutral hover:text-marioRed focus:outline-none font-mario text-sm md:text-base" data-target="no-physical">
+                <i class="fa fa-exclamation-triangle mr-2"></i>无实物报废
+            </button>
+        </div>
+
+        <!-- 处理方式卡片容器 - 简化文字排版 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- 1. 赠送外部使用方 -->
+            <div id="donate-card" class="mario-card bg-white rounded-lg overflow-hidden">
+                <div class="bg-marioGreen/20 p-5 border-b-3 border-black">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-marioGreen flex items-center font-mario">
+                            <i class="fa fa-gift mr-2"></i>赠送外部使用方
+                        </h2>
+                        <span class="mario-badge px-2 py-1 rounded-full">常用</span>
+                    </div>
+                    <p class="text-black text-base mt-2 font-medium">客户体验/试用、集采封样</p>
+                </div>
+                <div class="p-5">
+                    <h3 class="font-semibold mb-4 flex items-center font-mario text-marioBlue text-base">
+                        <i class="fa fa-check-circle text-marioBlue mr-2"></i>适用条件
+                    </h3>
+                    <ul class="text-base text-black space-y-3 mb-6 font-medium">
+                        <li class="flex items-start">
+                            <i class="fa fa-star text-marioYellow mt-1 mr-2"></i>
+                            <span>样机已实际转移且不再回收</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-star text-marioYellow mt-1 mr-2"></i>
+                            <span>有外发申请且单据流程已关闭（25年11月15日起，无需提交“虚拟返还单”）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-star text-marioYellow mt-1 mr-2"></i>
+                            <span>已获取外部使用方的接收证明（签收单/邮件/快递单等）</span>
+                        </li>
+                    </ul>
+
+                    <h3 class="font-semibold mb-4 flex items-center font-mario text-marioRed text-base">
+                        <i class="fa fa-list-ol text-marioRed mr-2"></i>操作流程
+                    </h3>
+                    <div class="space-y-3 text-base mb-4 font-medium">
+                        <div class="flex">
+                            <span class="bg-marioRed text-white w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-mario">1</span>
+                            <span>iEAM-与我有关-我的业务-资产外发</span>
+                        </div>
+                        <div class="flex">
+                            <span class="bg-marioRed text-white w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-mario">2</span>
+                            <span>选择"外发资产转交|销账"</span>
+                        </div>
+                        <div class="flex">
+                            <span class="bg-marioRed text-white w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-mario">3</span>
+                            <span>附件上传外部使用方接收举证</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 本地报废销毁 -->
+            <div id="destroy-card" class="mario-card bg-white rounded-lg overflow-hidden">
+                <div class="bg-marioRed/20 p-5 border-b-3 border-black">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-marioRed flex items-center font-mario">
+                            <i class="fa fa-trash mr-2"></i>本地报废
+                        </h2>
+                        <span class="mario-badge bg-marioRed px-2 py-1 rounded-full">常规</span>
+                    </div>
+                    <p class="text-black text-base mt-2 font-medium">样机已完成相关使命且无回收价值</p>
+                </div>
+                <div class="p-5">
+                    <h3 class="font-semibold mb-4 flex items-center font-mario text-marioBlue text-base">
+                        <i class="fa fa-check-circle text-marioBlue mr-2"></i>适用条件
+                    </h3>
+                    <ul class="text-base text-black space-y-3 mb-6 font-medium">
+                        <li class="flex items-start">
+                            <i class="fa fa-star text-marioYellow mt-1 mr-2"></i>
+                            <span>样机实物还在</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-star text-marioYellow mt-1 mr-2"></i>
+                            <span>样机无回收价值</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-star text-marioYellow mt-1 mr-2"></i>
+                            <span>完成TS有实物报废审批（TS路径请参考《海外营销类终端样机管理规范》）</span>
+                        </li>
+                    </ul>
+
+                    <h3 class="font-semibold mb-4 flex items-center font-mario text-marioRed text-base">
+                        <i class="fa fa-list-ol text-marioRed mr-2"></i>操作流程
+                    </h3>
+                    <div class="space-y-3 text-base mb-4 font-medium">
+                        <div class="flex">
+                            <span class="bg-marioRed text-white w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-mario">1</span>
+                            <span>自行报废或交由第三方专业报废机构处理（销毁需符合当地法律要求）</span>
+                        </div>
+                        <div class="flex">
+                            <span class="bg-marioRed text-white w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-mario">2</span>
+                            <span>iEAM-我的资产-销账-其他-去向明确</span>
+                        </div>
+                        <div class="flex">
+                            <span class="bg-marioRed text-white w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-mario">3</span>
+                            <span>上传举证（销毁照片/视频/委托协议等）</span>
+                        </div>
+                        <div class="flex">
+                            <span class="bg-marioRed text-white w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-mario">4</span>
+                            <span>iEAM系统完成报废销账</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. 归还总部 -->
+            <div id="return-card" class="mario-card bg-white rounded-lg overflow-hidden">
+                <div class="bg-marioBlue/20 p-5 border-b-3 border-black">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-marioBlue flex items-center font-mario">
+                            <i class="fa fa-reply mr-2"></i>归还总部
+                        </h2>
+                        <span class="mario-badge bg-marioBlue px-2 py-1 rounded-full">常规</span>
+                    </div>
+                    <p class="text-black text-base mt-2 font-medium">原定外发返还或有回收价值的样机</p>
+                </div>
+                <div class="p-5">
+                    <h3 class="font-semibold mb-4 flex items-center font-mario text-marioBlue text-base">
+                        <i class="fa fa-check-circle text-marioBlue mr-2"></i>适用条件
+                    </h3>
+                    <ul class="text-base text-black space-y-3 mb-6 font-medium">
+                        <li class="flex items-start">
+                            <i class="fa fa-star text-marioYellow mt-1 mr-2"></i>
+                            <span>原定外发返还样机</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-star text-marioYellow mt-1 mr-2"></i>
+                            <span>样机有回收价值</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-star text-marioYellow mt-1 mr-2"></i>
+                            <span>原定外发返还而不返还：因实物无价值，参考场景2提供报废TS审批及销毁举证；因客户原因，提交客户举证及合规条款举证</span>
+                        </li>
+                    </ul>
+
+                    <h3 class="font-semibold mb-4 flex items-center font-mario text-marioRed text-base">
+                        <i class="fa fa-list-ol text-marioRed mr-2"></i>操作流程
+                    </h3>
+                    <div class="space-y-3 text-base mb-4 font-medium">
+                        <div class="flex">
+                            <span class="bg-marioRed text-white w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-mario">1</span>
+                            <span>iEAM-我的业务-资产外发-发起返还申请</span>
+                        </div>
+                        <div class="flex">
+                            <span class="bg-marioRed text-white w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-mario">2</span>
+                            <span>实物返还</span>
+                        </div>
+                        <div class="flex">
+                            <span class="bg-marioRed text-white w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-mario">3</span>
+                            <span>确认总部签收</span>
+                        </div>
+                        <div class="flex">
+                            <span class="bg-marioRed text-white w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-mario">4</span>
+                            <span>确认样机账务已转交</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. 无实物报废 -->
+            <div id="no-physical-card" class="mario-card bg-white rounded-lg overflow-hidden">
+                <div class="bg-marioYellow/20 p-5 border-b-3 border-black">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-bold text-marioRed flex items-center font-mario">
+                            <i class="fa fa-exclamation-triangle mr-2"></i>无实物报废
+                        </h2>
+                        <span class="mario-badge bg-marioYellow text-black px-2 py-1 rounded-full">特殊</span>
+                    </div>
+                    <p class="text-black text-base mt-2 font-medium">样机丢了，没实物了的情况</p>
+                </div>
+                <div class="p-5">
+                    <h3 class="font-semibold mb-4 flex items-center font-mario text-marioBlue text-base">
+                        <i class="fa fa-check-circle text-marioBlue mr-2"></i>适用条件
+                    </h3>
+                    <ul class="text-base text-black space-y-3 mb-6 font-medium">
+                        <li class="flex items-start">
+                            <i class="fa fa-star text-marioYellow mt-1 mr-2"></i>
+                            <span>不可抗力（自然灾害、意外事故等）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-star text-marioYellow mt-1 mr-2"></i>
+                            <span>领用人管理不善弄丢（要追责）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-star text-marioYellow mt-1 mr-2"></i>
+                            <span>其他原因丢失证明举证</span>
+                        </li>
+                    </ul>
+
+                    <h3 class="font-semibold mb-4 flex items-center font-mario text-marioRed text-base">
+                        <i class="fa fa-list-ol text-marioRed mr-2"></i>操作流程
+                    </h3>
+                    <div class="space-y-3 text-base mb-4 font-medium">
+                        <div class="flex">
+                            <span class="bg-marioRed text-white w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-mario">1</span>
+                            <span>TS系统发起无实物报废申请</span>
+                        </div>
+                        <div class="flex">
+                            <span class="bg-marioRed text-white w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-mario">2</span>
+                            <span>iEAM提交“无实物报废”流程</span>
+                        </div>
+                        <div class="flex">
+                            <span class="bg-marioRed text-white w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-mario">3</span>
+                            <span>根据《研发材料管理工作规范》完成赔偿</span>
+                        </div>
+                        <div class="flex">
+                            <span class="bg-marioRed text-white w-7 h-7 rounded-full flex items-center justify-center mr-3 flex-shrink-0 font-mario">4</span>
+                            <span>提供TS审批记录、赔偿举证（如涉及），完成核销</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 合规要点提醒 - 简化文字效果 -->
+        <div class="mt-16 mario-section bg-light rounded-lg p-6">
+            <h2 class="text-xl font-bold mb-6 flex items-center font-mario text-marioRed">
+                <i class="fa fa-shield text-marioRed mr-3"></i>类终端样机管理避坑指南
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="mario-card bg-white p-5 rounded-md">
+                    <h3 class="font-semibold mb-3 flex items-center font-mario text-marioRed text-base">
+                        <i class="fa fa-ban text-marioRed mr-2"></i>禁止事项
+                    </h3>
+                    <ul class="text-base text-black space-y-2 font-medium">
+                        <li class="flex items-start">
+                            <i class="fa fa-times-circle text-danger mt-1 mr-2"></i>
+                            <span>没走外发申请就将实物带出国</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-times-circle text-danger mt-1 mr-2"></i>
+                            <span>资产还在手里没转移，就发起销账</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-times-circle text-danger mt-1 mr-2"></i>
+                            <span>有实物报废没通过TS审批就销毁实物</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-times-circle text-danger mt-1 mr-2"></i>
+                            <span>不按当地法律环保要求，自己随便销毁样机</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="mario-card bg-white p-5 rounded-md">
+                    <h3 class="font-semibold mb-3 flex items-center font-mario text-marioBlue text-base">
+                        <i class="fa fa-lightbulb-o text-marioYellow mr-2"></i>其他注意事项
+                    </h3>
+                    <ul class="text-base text-black space-y-2 font-medium">
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                            <span>举证材料要清晰（快递单号一致、信息真实）</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                            <span>外部使用方有变化，要重新走外发申请</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                            <span>离职/调动前，要交接好实物和账务</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                            <span>海外邮寄要符合相关行政邮寄合规指引</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 底部信息 - 简化文字效果 -->
+    <footer class="bg-dark text-white py-10 mt-16 mario-border relative z-10">
+        <div class="container mx-auto px-4">
+            <div class="text-center">
+                <h3 class="font-mario text-marioYellow mb-4 text-lg">海外营销运营管理部</h3>
+                <p class="text-gray-300 text-base font-mario">© 2025 海外营销类终端样机管理规范宣贯 | iEAM样机销账指南</p>
+                <!-- 游戏风格装饰 - 保留 -->
+                <div class="flex justify-center gap-4 mt-6">
+                    <div class="mario-brick w-12 h-12" style="animation-delay: 0s;"></div>
+                    <div class="mario-brick w-12 h-12" style="animation-delay: 1s;"></div>
+                    <div class="mario-brick w-12 h-12" style="animation-delay: 2s;"></div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 互动脚本 - 保留原有功能 -->
+    <script>
+        // 标签切换功能
+        const tabs = document.querySelectorAll('[data-target]');
+        const cards = document.querySelectorAll('[id$="-card"]');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 移除所有标签的激活状态
+                tabs.forEach(t => t.classList.remove('mario-tab-active', 'text-marioRed'));
+                tabs.forEach(t => t.classList.add('text-neutral'));
+                
+                // 添加当前标签的激活状态
+                tab.classList.add('mario-tab-active', 'text-marioRed');
+                tab.classList.remove('text-neutral');
+
+                // 卡片高亮效果
+                const target = tab.getAttribute('data-target');
+                cards.forEach(card => {
+                    if (card.id === `${target}-card`) {
+                        card.classList.add('ring-4', 'ring-marioYellow', 'ring-offset-2');
+                    } else {
+                        card.classList.remove('ring-4', 'ring-marioYellow', 'ring-offset-2');
+                    }
+                });
+            });
+        });
+
+        // 页面加载时默认高亮第一个卡片
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('donate-card').classList.add('ring-4', 'ring-marioYellow', 'ring-offset-2');
+            
+            // 生成粒子效果（简化）
+            createParticles();
+        });
+
+        // 粒子生成函数（简化效果）
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            const particleCount = 20; // 减少粒子数量
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // 随机粒子大小（3-6px）- 减小尺寸
+                const size = Math.random() * 3 + 3;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // 随机水平位置
+                const xPos = Math.random() * 100;
+                particle.style.left = `${xPos}%`;
+                
+                // 随机动画延迟（0-15秒）
+                const delay = Math.random() * 15;
+                particle.style.animationDelay = `${delay}s`;
+                
+                // 随机动画时长（8-20秒）
+                const duration = Math.random() * 12 + 8;
+                particle.style.animationDuration = `${duration}s`;
+                
+                container.appendChild(particle);
+            }
+        }
+    </script>
+</body>
+</html>
